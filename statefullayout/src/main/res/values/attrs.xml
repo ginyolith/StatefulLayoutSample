@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="StatefulLayout">
+        <attr name="stateful_layout_error" format="reference" />
+        <attr name="stateful_layout_retry_button_id" format="reference"/>
+        <attr name="stateful_layout_loading" format="reference" />
+    </declare-styleable>
+</resources>

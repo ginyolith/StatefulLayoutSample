@@ -1,12 +1,12 @@
-package com.ginyolith.statefullayout
+package com.ginyolith.statefullayout.widget
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.widget.Button
 import android.widget.FrameLayout
+import androidx.databinding.BindingAdapter
 
 class StatefulLayout @JvmOverloads constructor(
     context: Context,
@@ -14,15 +14,17 @@ class StatefulLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val errorView = View.inflate(context, R.layout.view_error_common, null)
-    private val loadingView = View.inflate(context, R.layout.view_loading_common, null)
-    private var childView : View? = null
+    private var errorView : View?   = null
+    private var loadingView : View? = null
+    private var childView : View?   = null
+    var retryButton : View? = null
+
     var onRetry : (() -> Unit)? = null
         set(value) {
             field = value
 
             if (value != null) {
-                errorView.findViewById<Button>(R.id.retryButton)?.setOnClickListener {
+                retryButton?.setOnClickListener {
                     value()
                 }
             }
@@ -52,10 +54,43 @@ class StatefulLayout @JvmOverloads constructor(
         }
 
     init {
-        addView(errorView, MATCH_PARENT, MATCH_PARENT)
-        addView(loadingView, MATCH_PARENT, MATCH_PARENT)
-        errorView.visibility = View.GONE
-        loadingView.visibility = View.GONE
+        val a = context.theme.obtainStyledAttributes(attrs, R.styleable.StatefulLayout, 0, 0)
+        try {
+            a.getResourceId(R.styleable.StatefulLayout_stateful_layout_error, -999999)
+                .let {
+                    if (it != -999999) {
+                        errorView = View.inflate(context, it, null)
+                    }
+                }
+
+            a.getResourceId(R.styleable.StatefulLayout_stateful_layout_loading,-999999)
+                .let {
+                    if (it != -999999) {
+                        loadingView = View.inflate(context, it, null)
+                    }
+                }
+
+            a.getResourceId(R.styleable.StatefulLayout_stateful_layout_retry_button_id, -99999)
+                .let {
+                    if (it != -99999) {
+                        retryButton = errorView?.findViewById(it)
+                    }
+                }
+
+        } finally {
+            a.recycle()
+        }
+
+        if (errorView != null) {
+            addView(errorView, MATCH_PARENT, MATCH_PARENT)
+            errorView?.visibility = View.GONE
+        }
+
+        if (loadingView != null) {
+            addView(loadingView, MATCH_PARENT, MATCH_PARENT)
+            loadingView?.visibility = View.GONE
+        }
+
     }
 
     override fun addView(child: View?, index: Int, params: ViewGroup.LayoutParams?) {
@@ -92,4 +127,14 @@ class StatefulLayout @JvmOverloads constructor(
     }
 
     enum class State { Loading, Display, Error}
+
+    companion object {
+        @BindingAdapter("app:state")
+        @JvmStatic
+        fun setState(layout: StatefulLayout, state : State?) {
+            if (state != null) {
+                layout.state = state
+            }
+        }
+    }
 }

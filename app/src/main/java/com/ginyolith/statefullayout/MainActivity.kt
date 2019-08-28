@@ -3,6 +3,7 @@ package com.ginyolith.statefullayout
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import com.ginyolith.statefullayout.widget.StatefulLayout
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.concurrent.thread
 import kotlin.random.Random
